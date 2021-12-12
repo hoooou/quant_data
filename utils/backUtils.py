@@ -1,4 +1,5 @@
 from backtrader_plotting import Bokeh
+from btplotting import BacktraderPlotting
 
 
 class BackUtils:
@@ -30,6 +31,11 @@ class BackUtils:
 
     def showSystemPlot(cerebro):
         cerebro.plot()
+    def showFourPlot(cerebro):
+        p = BacktraderPlotting(style='bar')
+        cerebro.plot(p)
+
+
 
 
 class DataUtils:
