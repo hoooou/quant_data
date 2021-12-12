@@ -10,7 +10,7 @@ class MyStrategy(bt.Strategy):
     """
     主策略程序
     """
-    params = (("maperiod", 7),("macd1", 7),("macd2", 7),("macds", 7),
+    params = (("maperiod", 12),("macd1", 12),("macd2", 26),("macds", 9),
               ('printlog', False),)  # 全局设定交易策略的参数, maperiod是 MA 均值的长度
 
     def __init__(self):
@@ -60,7 +60,7 @@ class MyStrategy(bt.Strategy):
             # 执行买入条件判断：收盘价格上涨突破15日均线
             if self.data_close[0] > self.sma[0]:
                 # 执行买入
-                size = self.cash * 0.8 / self.data_close[0];
+                size = self.cash * 0.5 / self.data_close[0];
                 size = round(size, 0)
                 self.log("BUY CREATE, %.2f,%d" % (self.data_close[0], size))
                 self.order = self.buy(size=size)
@@ -127,16 +127,17 @@ class MyStrategy(bt.Strategy):
 def startCereBro(cerebro, data, optParams=None,macdParams=None):
     cerebro.adddata(data, "OK")  # 将数据传入回测系统
     if (optParams != None):
-        cerebro.optstrategy(MyStrategy,maperiod=range(3, 31),macd1=range(3, 31),macd2=range(3, 31),macds=range(3, 31))  # 将交易策略加载到回测系统中
+        # cerebro.optstrategy(MyStrategy,maperiod=range(3, 31,2),macd1=range(3, 31,2),macd2=range(3, 31,2),macds=range(3, 31,2))  # 将交易策略加载到回测系统中
+        cerebro.optstrategy(MyStrategy,maperiod=(12))  # 将交易策略加载到回测系统中
     else:
         cerebro.addstrategy(MyStrategy)  # 将交易策略加载到回测系统中
-    start_cash = 1000
+    start_cash = 10000000
     cerebro.broker.setcash(start_cash)  # 设置初始资本为 100000
     cerebro.broker.setcommission(commission=0.002)  # 设置交易手续费为 0.2%
     cerebro.addsizer(bt.sizers.FixedSize, stake=100)  # 设置买入数量
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
     #runonce=False
-    results = cerebro.run(maxcpus=100)  # 运行回测系统
+    results = cerebro.run(maxcpus=30)  # 运行回测系统
     port_value = cerebro.broker.getvalue()  # 获取回测结束后的总资金
     pnl = port_value - start_cash  # 盈亏统计
 
@@ -159,7 +160,7 @@ def oneStratery(code, start_date, end_date):
                                todate=datetime.strptime(end_date, "%Y%m%d"))  # 加载数据
     cerebro = bt.Cerebro()  # 初始化回测系统
     results = startCereBro(cerebro, data)
-    BackUtils.showFourPlot(cerebro)
+    BackUtils.openQuantStats(results)
 
 
 def optStratery(code, start_date, end_date):
@@ -177,6 +178,6 @@ def optStratery(code, start_date, end_date):
 
 if __name__ == '__main__':
     start_date = "20171201"  # 回测开始时间
-    end_date = "20180601"  # 回测结束时间
+    end_date = "20200901"  # 回测结束时间
     code = "512880";
-    optStratery(code, start_date, end_date)
+    oneStratery(code, start_date, end_date)
